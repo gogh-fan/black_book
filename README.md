@@ -1,10 +1,9 @@
 # project
-블랙북 프로젝트
+## 블랙북 프로젝트
+흥신소 어플리케이션
 
-Front: Next.js
-
-Back: Nest.js
-
-Test: Jest.js
-
-Deploy: EC2, Kubernetis
+## Dev
+Front: Next.js  
+Back: Nest.js  
+Test: Jest.js  
+Deploy: EC2, Kubernetis  
