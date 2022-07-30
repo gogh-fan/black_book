@@ -5,5 +5,5 @@
 ### Dev
 Front: React.js  
 Back: Nest.js  
-Test: Jest, testing library, cypress
+Test: Jest, testing library, cypress  
 Deploy: EC2, Docker
