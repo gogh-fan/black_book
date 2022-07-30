@@ -1,26 +1,17 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useRecoilState } from "recoil";
+import { LoggedInRouter } from "./routers/logged-in-router";
+import { LoggedOutRouter } from "./routers/logged-out-router";
+import { isLoggedInState } from "./atoms";
+import { useEffect } from "react";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [isLoggedIn, setIsLoggedIn] = useRecoilState(isLoggedInState);
+    useEffect(() => {
+        setIsLoggedIn(Boolean(localStorage.getItem("jwt")));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    return isLoggedIn ? <LoggedInRouter /> : <LoggedOutRouter />;
 }
 
 export default App;

@@ -1,16 +1,25 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./styles/tailwind.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { HelmetProvider } from "react-helmet-async";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { RecoilRoot } from "recoil";
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+export const queryClient = new QueryClient();
+
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <React.StrictMode>
+        <RecoilRoot>
+            <QueryClientProvider client={queryClient}>
+                <HelmetProvider>
+                    <App />
+                </HelmetProvider>
+            </QueryClientProvider>
+        </RecoilRoot>
+    </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
