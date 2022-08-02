@@ -66,7 +66,10 @@ export const Management = () => {
         const response = await axios.get(`${BACK_URL}/work`, { headers: { jwt } });
         return response.data;
     };
-    const { data, isLoading, refetch } = useQuery<WorkManagement>("management", fetchReadMyWorks);
+    const { data, isLoading, refetch } = useQuery<WorkManagement>("management", fetchReadMyWorks, {
+        refetchOnWindowFocus: false,
+        retry: 0,
+    });
     const path = useLocation().pathname;
 
     //delete work

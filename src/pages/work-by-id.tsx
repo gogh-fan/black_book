@@ -99,7 +99,9 @@ export const WorkById = () => {
                         <h5 className="text-xl font-light mb-2">{workData?.data.description}</h5>
                         <br />
                         <h6 className="text-lg font-bold">
-                            {workData?.data.client?.nick} {workData?.data.address}
+                            Client Nick: {workData?.data.client?.nick}
+                            <br />
+                            Address: {workData?.data.address || "미입력"}
                         </h6>
                     </Content>
                     <CommentForm onSubmit={handleSubmit(onSubmit)}>

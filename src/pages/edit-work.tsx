@@ -1,12 +1,13 @@
 import axios from "axios";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { FormError } from "../components/form-error";
 import { BACK_URL } from "../constant/constants";
 import tw from "tailwind-styled-components";
 import { BackRespons } from "../types/interfaces";
 import { useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { WorkEntity } from "../types/work";
 
 const CreateWorkForm = tw.form`
     flex
@@ -58,6 +59,15 @@ export const EditWork = () => {
     const { workId } = useParams<{ workId: string }>();
     const { register, getValues, setValue, handleSubmit } = useForm<IForm>({ mode: "onChange" });
 
+    const fetchFindWorkById = async () => {
+        const response = await axios.get(`${BACK_URL}/work/detail/${workId}`, { headers: { jwt } });
+        return response.data.data;
+    };
+    const { data: workData } = useQuery<WorkEntity>([workId, "edit-profile"], fetchFindWorkById, {
+        refetchOnWindowFocus: false,
+        retry: 0,
+    });
+
     const navigate = useNavigate();
     const fetchCreateWork = async () => {
         try {
@@ -94,6 +104,7 @@ export const EditWork = () => {
         }
         mutate();
     };
+    console.log(workData);
 
     return (
         <>
@@ -101,10 +112,19 @@ export const EditWork = () => {
                 <title>Edit Work | Black Book</title>
             </Helmet>
             <CreateWorkForm onSubmit={handleSubmit(onSubmit)}>
-                <CreateWorkTitle {...register("title")} placeholder=" Title" />
-                <CreateWorkDescription {...register("description")} placeholder=" Description" />
+                <CreateWorkTitle {...register("title")} defaultValue={workData?.title} placeholder=" Title" />
+                <CreateWorkDescription
+                    {...register("description")}
+                    defaultValue={workData?.description}
+                    placeholder=" Description"
+                />
                 <CreateWorkOption>
-                    <input {...register("address")} className="border border-black w-1/2" placeholder=" Address..." />
+                    <input
+                        {...register("address")}
+                        defaultValue={workData?.address}
+                        className="border border-black w-1/2"
+                        placeholder=" Address..."
+                    />
                     <select {...register("isSecret")} className="border w-1/3">
                         <option value={""}>비밀 여부(기본값: X)</option>
                         <option value={0}>X</option>
