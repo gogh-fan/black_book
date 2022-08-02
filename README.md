@@ -5,4 +5,3 @@
 ### Dev
 Front: React  
 Back: Nest.js  
-Test: Jest, testing library, cypress
