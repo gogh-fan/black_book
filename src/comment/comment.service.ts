@@ -36,6 +36,15 @@ export class CommentService {
     );
   }
 
+  async read(workId: number) {
+    const comments = await this.commentRepository.find({
+      relations: ['writer', 'work'],
+    });
+    return comments
+      .filter((comment) => comment.workId === workId)
+      .sort((a, b) => +a.updatedAt - +b.updatedAt);
+  }
+
   async update(writerId: number, { content, commentId }: UpdateCommentDto) {
     if (!content) throw new HttpException('내용은 필수 입니다.', 400);
     if (!commentId)

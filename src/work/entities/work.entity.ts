@@ -5,6 +5,7 @@ import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -43,7 +44,7 @@ export class Work extends CoreEntity {
   @IsEnum(workStatus)
   state: workStatus;
 
-  @OneToMany(() => Comment, (comment) => comment.work, { nullable: true })
+  @OneToMany(() => Comment, (comment) => comment.work)
   comments: Comment[];
 
   @ManyToOne(() => User, (user) => user.commissions, { onDelete: 'CASCADE' })
@@ -51,6 +52,7 @@ export class Work extends CoreEntity {
   @RelationId((work: Work) => work.client)
   clientId: number;
 
-  @ManyToMany(() => User, (user) => user.participated, { nullable: true })
+  @ManyToMany(() => User, (user) => user.participated, { onDelete: 'CASCADE' })
+  @JoinTable()
   participants: User[];
 }

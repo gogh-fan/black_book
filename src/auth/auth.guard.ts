@@ -23,8 +23,6 @@ export class AuthGuard implements CanActivate {
     const req: Request = context.switchToHttp().getRequest();
     const token: string = req.headers.jwt as string;
     if (!token) throw new HttpException('로그인이 필요한 서비스 입니다.', 402);
-    if (token !== req.session.token)
-      throw new HttpException('인증 정보가 다릅니다.', 402);
 
     const decoded = jwt.verify(token, this.configService.get('JWT_PRIVATEKEY'));
     if (!decoded['user_id']) return false;

@@ -45,8 +45,8 @@ export class UserController {
 
   @Post('delete')
   @UseGuards(AuthGuard)
-  async delete(@Body() body: DeleteDto) {
-    return await this.userService.delete(body);
+  async delete(@CurrentUser() user: User, @Body() body: DeleteDto) {
+    return await this.userService.delete(user.id, body);
   }
 
   @Get('email-resend')
@@ -58,5 +58,11 @@ export class UserController {
   @Get('email-verify')
   async verifyEmail(@Query('code') code: string) {
     return await this.userService.verifyEmail(code);
+  }
+
+  @Get('/all-nicks')
+  @UseGuards(AuthGuard)
+  async allNicks() {
+    return await this.userService.allNicks();
   }
 }

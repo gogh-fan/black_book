@@ -29,9 +29,9 @@ export class UserService {
     if (password && password.length < 6)
       throw new HttpException('패스워드는 6자 이상 입니다.', 400);
     if (!email) throw new HttpException('이메일은 필수 입니다.', 400);
-    if (await this.userRepository.findOneBy({ nick }))
+    if ((await this.userRepository.findOneBy({ nick }))?.nick === nick)
       throw new HttpException('닉네임이 중복 됩니다.', 400);
-    if (await this.userRepository.findOneBy({ email }))
+    if ((await this.userRepository.findOneBy({ email }))?.email === email)
       throw new HttpException('이메일이 중복 됩니다.', 400);
 
     const user = await this.userRepository.save(
@@ -71,15 +71,14 @@ export class UserService {
     if (req.session && req.session.token) {
       req.sessionStore.destroy(req.sessionID);
       req.session.token = token;
+    } else if (req.session) {
+      req.session.token = token;
     }
-
-    //메모리 저장
-    req.session.token = token;
 
     return { token };
   }
 
-  async edit(userId: number, { nick, password, email }: EditDto) {
+  async edit(userId: number, { password, email }: EditDto) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user)
       throw new HttpException('존재하지 않는 사용자의 인증 정보 입니다.', 401);
@@ -96,20 +95,18 @@ export class UserService {
         verification.code,
       );
     }
-    if (nick) user.nick = nick;
     if (password) user.password = password;
 
     await this.userRepository.save(user);
   }
 
-  async delete({ email, password }: DeleteDto) {
+  async delete(userId: number, { password }: DeleteDto) {
     const user = await this.userRepository.findOne({
-      where: { email },
+      where: { id: userId },
       select: ['id', 'password'],
     });
-    if (!user)
-      throw new HttpException('존재하지 않는 사용자의 이메일 입니다.', 400);
-    const result = user.comparePassword(password);
+    if (!user) throw new HttpException('존재하지 않는 사용자 입니다.', 400);
+    const result = await user.comparePassword(password);
     if (!result) throw new HttpException('비밀번호가 다릅니다.', 400);
 
     await this.userRepository.delete({ id: user.id });
@@ -125,6 +122,7 @@ export class UserService {
     const verification = await this.verificationRepository.save(
       this.verificationRepository.create({ user }),
     );
+
     await this.mailService.sendVerificationEmail(user.email, verification.code);
   }
 
@@ -137,5 +135,9 @@ export class UserService {
 
     verification.user.verified = true;
     await this.userRepository.save(verification.user);
+  }
+
+  async allNicks() {
+    return (await this.userRepository.find()).map((user) => user.nick);
   }
 }

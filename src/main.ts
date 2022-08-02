@@ -16,12 +16,13 @@ async function bootstrap() {
       saveUninitialized: false,
     }),
   );
+
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new SuccessInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
   app.enableCors({ origin: true, credentials: true });
 
-  await app.listen(3000);
+  await app.listen(4000);
 }
 bootstrap();

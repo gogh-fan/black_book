@@ -18,49 +18,47 @@ export class PaymentService {
     private readonly configService: ConfigService,
   ) {}
 
-  async successPayment(
-    userId: number,
-    { transactionId, amount }: SuccessPaymentDto,
-  ) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user)
-      throw new HttpException('사용자 인증정보가 올바르지 않습니다.', 401);
+  async successPayment(userId: number, { orderId, amount }: SuccessPaymentDto) {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user)
+        throw new HttpException('사용자 인증정보가 올바르지 않습니다.', 401);
 
-    got
-      .post(
-        'https://api.tosspayments.com/v1/payments/' +
-          this.configService.get('TOSS_SECRETKEY'),
+      await got.post(
+        `https://api.tosspayments.com/v1/payments/${this.configService.get(
+          'TOSS_SECRETKEY',
+        )}`,
         {
           headers: {
-            Authorization:
-              'Basic ' +
-              Buffer.from(
-                this.configService.get('TOSS_SECRETKEY') + ':',
-              ).toString('base64'),
+            Authorization: `Basic ${Buffer.from(
+              this.configService.get('TOSS_SECRETKEY') + ':',
+            ).toString('base64')}`,
             'Content-Type': 'application/json',
           },
           json: {
-            orderId: transactionId,
+            orderId,
             amount,
           },
           responseType: 'json',
         },
-      )
-      .then(() => {
-        this.paymentRepository.save(
-          this.paymentRepository.create({
-            transactionId,
-            user,
-            amount,
-          }),
-        );
-      })
-      .catch((error) => {
-        throw new HttpException(
-          error.response?.body?.message,
-          error.response?.body?.code,
-        );
-      });
+      );
+
+      await this.paymentRepository.save(
+        this.paymentRepository.create({
+          orderId,
+          user,
+          amount,
+        }),
+      );
+
+      user.secretMember = true;
+      await this.userRepository.save(user);
+    } catch (error) {
+      throw new HttpException(
+        error.response?.body?.message,
+        error.response?.body?.code,
+      );
+    }
   }
 
   async failPayment(req: Request) {

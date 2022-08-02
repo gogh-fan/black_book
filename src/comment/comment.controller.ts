@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Post,
   UseGuards,
@@ -21,6 +22,12 @@ export class CommentController {
   @UseGuards(AuthGuard)
   async create(@CurrentUser() user: User, @Body() body: CreateCommentDto) {
     return await this.commentService.create(user.id, body);
+  }
+
+  @Get('/:workId')
+  @UseGuards(AuthGuard)
+  async read(@Param('workId') workId: string) {
+    return await this.commentService.read(+workId);
   }
 
   @Post('update')

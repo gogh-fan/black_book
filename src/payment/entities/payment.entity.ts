@@ -7,7 +7,7 @@ import { Column, Entity, ManyToOne } from 'typeorm';
 export class Payment extends CoreEntity {
   @Column()
   @IsUUID()
-  transactionId: string;
+  orderId: string;
 
   @Column()
   @IsNumber()

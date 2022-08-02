@@ -11,7 +11,7 @@ export class MailService {
 
   async sendVerificationEmail(to: string, code: string): Promise<void> {
     const baseUrl = this.configService.get('BASE_URL');
-    const url = `${baseUrl}/user/email-verify?code=${code}`;
+    const url = `${baseUrl}/email-verify`;
 
     await this.mailerService.sendMail({
       to,
@@ -20,6 +20,7 @@ export class MailService {
       html: `
         가입확인 버튼를 누르시면 가입 인증이 완료됩니다.<br/>
         <form action="${url}" method="get">
+          <input type="hidden" name="code" value=${code} />
           <button formtarget="_blank">가입확인</button>
         </form>
       `,

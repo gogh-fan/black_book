@@ -42,7 +42,7 @@ export class User extends CoreEntity {
   @OneToMany(() => Work, (work) => work.client)
   commissions: Work[];
 
-  @ManyToMany(() => Work, (work) => work.participants)
+  @ManyToMany(() => Work, (work) => work.participants, { onDelete: 'CASCADE' })
   participated: Work[];
 
   @OneToMany(() => Payment, (payment) => payment.user)

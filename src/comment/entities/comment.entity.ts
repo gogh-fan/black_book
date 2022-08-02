@@ -17,4 +17,6 @@ export class Comment extends CoreEntity {
 
   @ManyToOne(() => Work, (work) => work.comments, { onDelete: 'CASCADE' })
   work: Work;
+  @RelationId((comment: Comment) => comment.work)
+  workId: number;
 }
