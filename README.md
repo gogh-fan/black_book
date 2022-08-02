@@ -3,6 +3,6 @@
 작업 모집 어플리케이션
 
 ### Dev
-Front: React.js by CRA typescript  
+Front: React  
 Back: Nest.js  
 Test: Jest, testing library, cypress
