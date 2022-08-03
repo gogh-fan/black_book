@@ -26,6 +26,7 @@ const CreateWorkDescription = tw.textarea`
     h-48
     border
     border-black
+    focus:outline-none
 `;
 const CreateWorkOption = tw.div`
     mt-3
@@ -46,9 +47,9 @@ const CreateWorkButton = tw.button`
 interface IForm {
     title: string;
     description: string;
-    address?: string;
-    coverImg?: string;
     isSecret: number;
+    address?: string;
+    coverImg?: FileList;
 }
 
 const jwt = localStorage.getItem("jwt") ?? "";
@@ -57,29 +58,29 @@ export const CreateWork = () => {
     const {
         register,
         getValues,
-        setValue,
         handleSubmit,
         formState: { errors },
     } = useForm<IForm>({ mode: "onChange" });
 
+    //create-work
     const navigate = useNavigate();
-    const fetchCreateWork = async () => {
+    const fetchCreateWork = async (data: any) => {
         try {
-            const { title, description, address, coverImg, isSecret } = getValues();
-            const secret = isSecret > 0 ? true : false;
+            const { title, description, address, isSecret } = getValues();
+            const secret = +isSecret > 0 ? true : false;
             const response = await axios.post(
                 `${BACK_URL}/work/create`,
-                { title, description, address, coverImg, isSecret: secret },
+                { title, description, address, coverImg: data ?? undefined, isSecret: secret },
                 { headers: { jwt } }
             );
             return response.data;
         } catch (error: any) {
-            throw new Error("비밀회원이 아닙니다.");
+            throw new Error(error.response.data.error.message);
         }
     };
-    const { mutate, error } = useMutation<BackRespons, { message: string }>(fetchCreateWork, {
+    const { mutate: CreateWorkMutate, error } = useMutation<BackRespons, { message: string }>(fetchCreateWork, {
         retry: 0,
-        onSuccess: (data) => {
+        onSuccess: () => {
             alert("작성 완료");
             navigate("/");
         },
@@ -87,16 +88,31 @@ export const CreateWork = () => {
             alert(e.message);
         },
     });
-    const onSubmit: SubmitHandler<IForm> = async (data) => {
-        if (data.coverImg) {
-            const form = new FormData().append("coverImg", data.coverImg);
-            const uploadResponse = await axios.post(`${BACK_URL}/upload`, form, {
-                withCredentials: true,
-                headers: { jwt },
-            });
-            setValue("coverImg", uploadResponse.data.data);
-        }
-        mutate();
+
+    //upload-coverimg
+    const fetchUpload = async (file: File) => {
+        const form = new FormData();
+        form.append("coverImg", file);
+        const { data } = await (
+            await fetch(`${BACK_URL}/upload`, {
+                method: "POST",
+                body: form,
+            })
+        ).json();
+        return data;
+    };
+    const { mutate: uploadMutate } = useMutation(fetchUpload, {
+        onSuccess: (data) => {
+            CreateWorkMutate(data);
+        },
+    });
+    const onSubmit: SubmitHandler<IForm> = async () => {
+        // fake path issue
+        // @ts-ignore
+        const file: File = document.getElementById("file").files[0];
+
+        if (file !== undefined) uploadMutate(file);
+        else CreateWorkMutate();
     };
 
     return (
@@ -110,6 +126,9 @@ export const CreateWork = () => {
                 <CreateWorkDescription
                     {...register("description", { required: "내용은 필수 입니다." })}
                     placeholder=" Description"
+                    rows="10"
+                    cols="10"
+                    className=""
                 />
                 {errors.description?.message && <FormError errorMessage={errors.description.message} />}
                 <CreateWorkOption>
@@ -119,7 +138,7 @@ export const CreateWork = () => {
                         <option value={0}>X</option>
                         <option value={1}>O</option>
                     </select>
-                    <input {...register("coverImg")} id="file" className="hidden" type={"file"} />
+                    <input {...register("coverImg")} id="file" className="hidden" type={"file"} accept="image/*" />
                     <label htmlFor="file" className="border border-black bg-gray-300 rounded-md cursor-pointer">
                         이미지 첨부
                     </label>

@@ -57,8 +57,9 @@ const jwt = localStorage.getItem("jwt") ?? "";
 
 export const EditWork = () => {
     const { workId } = useParams<{ workId: string }>();
-    const { register, getValues, setValue, handleSubmit } = useForm<IForm>({ mode: "onChange" });
+    const { register, getValues, handleSubmit } = useForm<IForm>({ mode: "onChange" });
 
+    // find work by id
     const fetchFindWorkById = async () => {
         const response = await axios.get(`${BACK_URL}/work/detail/${workId}`, { headers: { jwt } });
         return response.data.data;
@@ -68,14 +69,15 @@ export const EditWork = () => {
         retry: 0,
     });
 
+    // edit work
     const navigate = useNavigate();
-    const fetchCreateWork = async () => {
+    const fetchEditWork = async (data: any) => {
         try {
-            const { title, description, address, coverImg, isSecret } = getValues();
+            const { title, description, address, isSecret } = getValues();
             const secret = isSecret > 0 ? true : false;
             const response = await axios.post(
                 `${BACK_URL}/work/update`,
-                { id: workId, title, description, address, coverImg, isSecret: secret },
+                { id: workId, title, description, address, coverImg: data ?? undefined, isSecret: secret },
                 { headers: { jwt } }
             );
             return response.data;
@@ -83,7 +85,7 @@ export const EditWork = () => {
             throw new Error("비밀회원이 아닙니다.");
         }
     };
-    const { mutate, error } = useMutation<BackRespons, { message: string }>(fetchCreateWork, {
+    const { mutate: editWorkMutate, error } = useMutation<BackRespons, { message: string }>(fetchEditWork, {
         retry: 0,
         onSuccess: () => {
             alert("수정 완료");
@@ -93,18 +95,45 @@ export const EditWork = () => {
             alert(e.message);
         },
     });
-    const onSubmit: SubmitHandler<IForm> = async (data) => {
-        if (data.coverImg) {
-            const form = new FormData().append("coverImg", data.coverImg);
-            const uploadResponse = await axios.post(`${BACK_URL}/upload`, form, {
-                withCredentials: true,
-                headers: { jwt },
-            });
-            setValue("coverImg", uploadResponse.data.data);
-        }
-        mutate();
+
+    // edit coverImg
+    const fetchUploadImg = async () => {
+        // fake path issue
+        // @ts-ignore
+        const file: File = document.getElementById("file").files[0];
+        const form = new FormData();
+        form.append("coverImg", file);
+        const { data } = await (
+            await fetch(`${BACK_URL}/upload`, {
+                method: "POST",
+                body: form,
+            })
+        ).json();
+        return data;
     };
-    console.log(workData);
+    const { mutate: uploadMutate } = useMutation(fetchUploadImg, {
+        onSuccess: (data) => {
+            editWorkMutate(data);
+        },
+    });
+    const fetchEditImg = async (coverImg: string | undefined) => {
+        if (!coverImg) {
+            uploadMutate();
+            return;
+        }
+        const [bucket, key] = coverImg.slice(8).split(".s3.amazonaws.com/");
+        await axios.delete(`${BACK_URL}/upload/${bucket}/${key}`);
+        uploadMutate();
+    };
+
+    //onSubmit
+    const onSubmit: SubmitHandler<IForm> = async (data) => {
+        // fake path issue
+        // @ts-ignore
+        const file: File = document.getElementById("file").files[0];
+        if (file !== undefined) fetchEditImg(workData?.coverImg);
+        else editWorkMutate();
+    };
 
     return (
         <>
