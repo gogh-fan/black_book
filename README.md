@@ -1,1 +1,1 @@
-랜덤 키 생성 사이트 : https://randomkeygen.com/
+utils: postgresQL, typeorm, mailer, aws s3, .env, joi, jest
