@@ -1,12 +1,12 @@
 FROM node:16 AS builder
-WORKDIR /blackbook/back
+WORKDIR /app
 COPY . .
 RUN npm install
 RUN npm run build
 
 FROM node:16-alpine
-WORKDIR /blackbook/back
+WORKDIR /app
 ENV NODE_ENV production
-COPY --from=builder /blackbook/back/dist ./
+COPY --from=builder /app ./
 EXPOSE 4000
-CMD node dist/main
+CMD npm run start:prod

@@ -19,8 +19,12 @@ import { UploadModule } from './upload/upload.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
-      ignoreEnvFile: process.env.NODE_ENV === 'production',
+      envFilePath:
+        process.env.NODE_ENV === 'production'
+          ? '.env.production'
+          : process.env.NODE_ENV === 'dev'
+          ? '.env.dev'
+          : '.env.test',
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('dev', 'test', 'production').required(),
         DB_HOST: Joi.string().required(),

@@ -30,11 +30,11 @@ export class Work extends CoreEntity {
 
   @Column({ nullable: true })
   @IsString()
-  address: string;
+  address?: string;
 
   @Column({ nullable: true })
   @IsString()
-  coverImg: string;
+  coverImg?: string;
 
   @Column({ default: false })
   @IsBoolean()

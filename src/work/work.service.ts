@@ -128,7 +128,6 @@ export class WorkService {
     if (title) work.title = title;
     if (description) work.description = description;
     if (address) work.address = address;
-    else work.address = '';
     if (coverImg) work.coverImg = coverImg;
     if (!client.secretMember && isSecret) {
       throw new HttpException('비밀멤버가 아닙니다.', 403);

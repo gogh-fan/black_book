@@ -1,0 +1,19 @@
+version: '3'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 4000:4000
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    container_name: blackbook-postgres
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - .:/
